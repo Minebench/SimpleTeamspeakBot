@@ -128,7 +128,6 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
             e.printStackTrace();
         }
     
-        getLogger().log(Level.INFO, move.getRawResponse());
         if (move.getError().isSuccessful()) {
             sender.sendMessage(ChatColor.GREEN + "Moved " + target.getName() + " to channel " + channel.getName());
         } else {
@@ -174,7 +173,6 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
             e.printStackTrace();
         }
     
-        getLogger().log(Level.INFO, move.getRawResponse());
         if (move.getError().isSuccessful()) {
             sender.sendMessage(ChatColor.GREEN + "Moved " + clientIds.size() + " clients to channel " + channel.getName() +
                     (targets.size() > clientIds.size() ? ChatColor.GRAY + "(" + (targets.size() - clientIds.size()) + " clients were not found!)" : ""));
