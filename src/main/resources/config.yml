@@ -1,0 +1,9 @@
+ts:
+  host: example.com
+  port: 10011
+  user: queryname
+  pass: querypassword
+  virtualserver: 1
+  nickname: SimpleTeamspeakBot
+teams:
+  teamname: 1 # channel id

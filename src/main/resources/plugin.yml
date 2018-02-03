@@ -1,0 +1,36 @@
+name: TeasmspeakTeams
+version: ${project.version}
+main: de.minebench.teamspeakteams.SimpleTeamspeakBot
+authors: [Phoenix616]
+commands:
+   simpleteamspeakbot:
+      aliases: [simpletsbot, stsb]
+      description: Main plugin command description.
+      usage: /<command> [reload|join [<player>|team:<team>] <channel>|team [team:<team>|<player>]]
+      permission: teamspeakteams.command
+      permission-message: You don't have the permission <permission>
+permissions:
+   simpleteamspeakbot.command:
+      description: Gives permission to the plugin command
+      default: op
+   simpleteamspeakbot.command.join:
+      description: Gives permission to join others into channels
+      default: op
+   simpleteamspeakbot.command.join.others:
+      description: Gives permission to join others into channels
+      default: op
+   simpleteamspeakbot.command.join.team:
+      description: Gives permission to join others into channels
+      default: op
+   simpleteamspeakbot.command.team:
+      description: Gives permission to join into your teams channel
+      default: op
+   simpleteamspeakbot.command.team.others:
+      description: Gives permission to join other player to their team
+      default: op
+   simpleteamspeakbot.command.team.team:
+      description: Gives permission to join a whole team
+      default: op
+   simpleteamspeakbot.command.reload:
+      description: Gives permission to reload the plugin
+      default: op
