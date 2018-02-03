@@ -5,6 +5,8 @@ import com.github.theholywaffle.teamspeak3.TS3Config;
 import com.github.theholywaffle.teamspeak3.TS3Query;
 import com.github.theholywaffle.teamspeak3.api.wrapper.ChannelBase;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
+import com.github.theholywaffle.teamspeak3.commands.CClientMove;
+import com.github.theholywaffle.teamspeak3.commands.Command;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.bukkit.ChatColor;
@@ -14,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +36,7 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
     private TS3Api ts3api;
     private Map<String, Integer> teamChannels = new HashMap<>();
     private Cache<UUID, Integer> clientCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(10, TimeUnit.MINUTES).build();
+    private Method doCommand = null;
     
     @Override
     public void onEnable() {
@@ -60,6 +65,14 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
             ts3Query = new TS3Query(new TS3Config()
                     .setHost(getConfig().getString("ts.host"))
                     .setQueryPort(getConfig().getInt("ts.port")));
+    
+            try {
+                doCommand = ts3Query.getClass().getMethod("doCommand", Command.class);
+                doCommand.setAccessible(true);
+            } catch (NoSuchMethodException | SecurityException e) {
+                e.printStackTrace();
+            }
+    
             ts3Query.connect();
             
             ts3api = ts3Query.getApi();
@@ -107,11 +120,20 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
             sender.sendMessage(ChatColor.RED + "No Teamspeak client found online for player " + target.getUniqueId());
             return;
         }
-        
-        if (ts3api.moveClient(clientId, channel.getId())) {
+    
+        final CClientMove move = new CClientMove(clientId, channel.getId(), null);
+        try {
+            doCommand.invoke(ts3Query, move);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    
+        getLogger().log(Level.INFO, move.getRawResponse());
+        if (move.getError().isSuccessful()) {
             sender.sendMessage(ChatColor.GREEN + "Moved " + target.getName() + " to channel " + channel.getName());
         } else {
-            sender.sendMessage(ChatColor.RED + "Error while moving " + target.getName() + " to channel " + channel.getName());
+            sender.sendMessage(ChatColor.RED + "Error while moving " + target.getName() + " to channel " + channel.getName()
+                    + ": " + move.getError().getId() + "/" + move.getError().getMessage());
         }
     }
     
@@ -144,13 +166,22 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
                 .filter(Player::isOnline)
                 .collect(Collectors.toSet());
         Set<Integer> clientIds = getClientIds(players);
+        
+        final CClientMove move = new CClientMove(clientIds.stream().mapToInt(i->i).toArray(), channel.getId(), null);
+        try {
+            doCommand.invoke(ts3Query, move);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     
-        if (ts3api.moveClients(clientIds.stream().mapToInt(i->i).toArray(), channel.getId())) {
+        getLogger().log(Level.INFO, move.getRawResponse());
+        if (move.getError().isSuccessful()) {
             sender.sendMessage(ChatColor.GREEN + "Moved " + clientIds.size() + " clients to channel " + channel.getName() +
                     (targets.size() > clientIds.size() ? ChatColor.GRAY + "(" + (targets.size() - clientIds.size()) + " clients were not found!)" : ""));
         } else {
             sender.sendMessage(ChatColor.RED + "Error while trying to move " + clientIds.size() + " clients to channel " + channel.getName() +
-                    (targets.size() > clientIds.size() ?  ChatColor.GRAY + "(" + (targets.size() - clientIds.size()) + " clients were not found!)" : ""));
+                    (targets.size() > clientIds.size() ?  ChatColor.GRAY + "(" + (targets.size() - clientIds.size()) + " clients were not found!)" : "")
+                    + ": " + move.getError().getId() + "/" + move.getError().getMessage());
         }
     }
     
