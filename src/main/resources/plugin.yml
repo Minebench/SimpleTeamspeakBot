@@ -1,4 +1,4 @@
-name: TeasmspeakTeams
+name: SimpleTeamspeakBot
 version: ${project.version}
 main: de.minebench.simpleteamspeakbot.SimpleTeamspeakBot
 authors: [Phoenix616]
