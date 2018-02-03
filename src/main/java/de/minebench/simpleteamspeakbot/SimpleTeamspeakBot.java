@@ -67,7 +67,7 @@ public final class SimpleTeamspeakBot extends JavaPlugin {
                     .setQueryPort(getConfig().getInt("ts.port")));
     
             try {
-                doCommand = ts3Query.getClass().getMethod("doCommand", Command.class);
+                doCommand = ts3Query.getClass().getDeclaredMethod("doCommand", Command.class);
                 doCommand.setAccessible(true);
             } catch (NoSuchMethodException | SecurityException e) {
                 e.printStackTrace();
